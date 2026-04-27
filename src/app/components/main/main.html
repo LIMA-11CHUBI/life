@@ -1,0 +1,37 @@
+<section class="d-flex flex-wrap gap-3">
+
+  <div>
+    <button (click)="filterByCategory(null)">All</button>
+
+    @for (c of categories; track c.id) {
+      <button (click)="filterByCategory(c.id)">
+        {{ c.name }}
+      </button>
+    }
+  </div>
+
+</section>
+
+<hr>
+
+<section class="d-flex flex-wrap gap-3">
+
+  @for (p of filteredProducts; track p.id) {
+    <div class="card" style="width: 18rem; margin: 10px;">
+
+      <img [src]="p.image" class="card-img-top" alt="product image">
+
+      <div class="card-body">
+
+        <h5 class="card-title">{{ p.name }}</h5>
+
+        <p class="card-text">
+          💰 Price: {{ p.price }}$
+        </p>
+
+      </div>
+
+    </div>
+  }
+
+</section>
