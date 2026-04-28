@@ -1,38 +1,43 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { BehaviorSubject, Observable, combineLatest, map, shareReplay } from 'rxjs';
 import { ProductService } from '../../services/toolsservices';
 
 @Component({
   selector: 'app-main',
+  imports: [AsyncPipe],
   templateUrl: './main.html',
   styleUrl: './main.css',
 })
 export class Main implements OnInit {
 
-  public products = signal<any[]>([]);
-  public categories = signal<any[]>([]);
-  public filteredProducts = signal<any[]>([]);
+  public products$!: Observable<any[]>;
+  public categories$!: Observable<any[]>;
+  public filteredProducts$!: Observable<any[]>;
+
+  private selectedCategoryId$ = new BehaviorSubject<number | null>(null);
 
   constructor(public productService: ProductService) {}
 
   ngOnInit(): void {
-    this.productService.getProducts().subscribe((data) => {
-      this.products.set(data);
-      this.filteredProducts.set(data);
-    });
-    this.productService.getCategories().subscribe((data) => {
-      this.categories.set(data);
-    });
+    this.products$ = this.productService.getProducts().pipe(shareReplay(1));
+    this.categories$ = this.productService.getCategories();
+
+    this.filteredProducts$ = combineLatest([
+      this.products$,
+      this.selectedCategoryId$,
+    ]).pipe(
+      map(([products, categoryId]) =>
+        categoryId === null
+          ? products
+          : products.filter(
+              (p) => p.categoryId === categoryId || p.category?.id === categoryId
+            )
+      )
+    );
   }
 
   filterByCategory(categoryId: number | null): void {
-    if (categoryId === null) {
-      this.filteredProducts.set(this.products());
-      return;
-    }
-    this.filteredProducts.set(
-      this.products().filter(
-        (p) => p.categoryId === categoryId || p.category?.id === categoryId
-      )
-    );
+    this.selectedCategoryId$.next(categoryId);
   }
 }
