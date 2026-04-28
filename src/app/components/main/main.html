@@ -3,7 +3,7 @@
   <div>
     <button (click)="filterByCategory(null)">All</button>
 
-    @for (c of categories; track c.id) {
+    @for (c of categories(); track c.id) {
       <button (click)="filterByCategory(c.id)">
         {{ c.name }}
       </button>
@@ -16,7 +16,7 @@
 
 <section class="d-flex flex-wrap gap-3">
 
-  @for (p of filteredProducts; track p.id) {
+  @for (p of filteredProducts(); track p.id) {
     <div class="card" style="width: 18rem; margin: 10px;">
 
       <img [src]="p.image" class="card-img-top" alt="product image">
